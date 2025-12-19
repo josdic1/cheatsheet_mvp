@@ -1,93 +1,152 @@
-import { useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function CheatForm() {
+  const { user, createCheat, updateCheat, allCategories, allLanguages } =
+    useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { addCheat, updateCheat, languages, categories } = useAuth();
+  const [formData, setFormData] = useState({
+    title: "",
+    code: "",
+    notes: "",
+    language_id: "",
+    category_id: "",
+  });
 
-  const initialData = location.state?.cheat || {
-    title: "", code: "", notes: "",
-    language_id: languages?.[0]?.id || "",
-    category_id: categories?.[0]?.id || ""
+  const onClear = () => {
+    setFormData({
+      title: "",
+      code: "",
+      notes: "",
+      language_id: "",
+      category_id: "",
+    });
   };
 
-  const [formData, setFormData] = useState(initialData);
+  useEffect(() => {
+    if (id && user?.languages) {
+      const allCheats = user.languages.flatMap((lang) => lang.cheats || []);
+      const foundCheat = allCheats.find((c) => c.id === parseInt(id));
+
+      if (foundCheat) {
+        setFormData({
+          title: foundCheat.title || "",
+          code: foundCheat.code || "",
+          notes: foundCheat.notes || "",
+          language_id: foundCheat.language_id || "",
+          category_id: foundCheat.category_id || "",
+        });
+      }
+    }
+  }, [id, user]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (id) {
-      await updateCheat(id, formData);
-    } else {
-      await addCheat(formData);
+
+    const payload = {
+      title: formData.title,
+      code: formData.code,
+      notes: formData.notes,
+      language_id: parseInt(formData.language_id),
+      category_id: parseInt(formData.category_id),
+      user_id: user.id,
+    };
+
+    const result = id
+      ? await updateCheat(id, payload)
+      : await createCheat(payload);
+
+    if (!result.success) {
+      console.error("Failed:", result.error);
+      return;
     }
+    onClear();
     navigate("/");
   };
 
   return (
-    <div className="container" style={{ maxWidth: '800px' }}>
-      <h1>{id ? "Edit Entry" : "New Entry"}</h1>
-
-      <form onSubmit={handleSubmit} style={{ marginTop: 30 }}>
-
-        <div className="form-group">
-          <label style={{ fontWeight: 'bold' }}>Title</label>
+    <>
+      <div className="form-container">
+        <button type="button" onClick={() => navigate(-1)}>
+          ⬅ Back to Home
+        </button>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="title">Title</label>
           <input
-            type="text" required value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="e.g. Docker Container Reset"
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
           />
-        </div>
 
-        <div className="form-row form-group">
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Language</label>
-            <select
-              value={formData.language_id}
-              onChange={(e) => setFormData({ ...formData, language_id: parseInt(e.target.value) })}
-            >
-              {languages.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Category</label>
-            <select
-              value={formData.category_id}
-              onChange={(e) => setFormData({ ...formData, category_id: parseInt(e.target.value) })}
-            >
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-        </div>
+          <label htmlFor="language_id">Language</label>
+          <select
+            id="language_id"
+            name="language_id"
+            value={formData.language_id}
+            onChange={handleChange}
+          >
+            <option value="" disabled>
+              Select a language
+            </option>
+            {allLanguages.map((lang) => (
+              <option key={lang.id} value={lang.id}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
 
-        <div className="form-group">
-          <label style={{ fontWeight: 'bold' }}>Code</label>
+          <label htmlFor="category_id">Category</label>
+          <select
+            id="category_id"
+            name="category_id"
+            value={formData.category_id}
+            onChange={handleChange}
+          >
+            <option value="" disabled>
+              Select a category
+            </option>
+            {allCategories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+
+          <label htmlFor="code">Code</label>
           <textarea
-            required rows="12" value={formData.code}
-            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-            style={{ fontFamily: 'monospace' }}
+            id="code"
+            name="code"
+            value={formData.code}
+            onChange={handleChange}
           />
-        </div>
 
-        <div className="form-group">
-          <label style={{ fontWeight: 'bold' }}>Notes (Optional)</label>
-          <textarea
-            rows="4" value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          <label htmlFor="notes">Notes</label>
+          <input
+            type="text"
+            id="notes"
+            name="notes"
+            value={formData.notes}
+            onChange={handleChange}
           />
-        </div>
 
-        <div style={{ marginTop: 30 }}>
-          <button type="submit" className="btn btn-primary" style={{ marginLeft: 0 }}>
-            {id ? "Save Changes" : "Create Entry"}
+          <button type="submit">{id ? "Update" : "Create"}</button>
+          <button type="button" onClick={onClear}>
+            Clear
           </button>
-          <button type="button" onClick={() => navigate("/")} className="btn">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </>
   );
 }

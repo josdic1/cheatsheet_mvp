@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
+import { FerrisWheel, FileAxis3D } from "lucide-react";
 
 export function LoginPage() {
     const [email, setEmail] = useState("");
@@ -10,13 +11,17 @@ export function LoginPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await login(email, password);
+        await login({ email, password });
         navigate("/");
     };
 
     return (
         <div className="auth-box">
-            <h2 className="text-center" style={{ marginTop: 0 }}>Login</h2>
+            <h2 className="text-center" style={{ marginTop: 0 }}>Login </h2>
+                <button type='button' onClick={() => {
+                    setEmail('josh@josh.com')
+                    setPassword('1111')}
+                }><FerrisWheel size={16} strokeWidth={1.5} /></button>
 
             {error && <div style={{ color: "red", marginBottom: "15px" }}>{error}</div>}
 

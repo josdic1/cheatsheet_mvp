@@ -6,10 +6,13 @@ export function CheatPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-    const { cheats, deleteCheat } = useAuth();
+    const { user, deleteCheat } = useAuth();
 
-    // Try to find cheat in state or global list
-    const cheat = location.state?.cheat || cheats?.find(c => c.id === parseInt(id));
+    // Derive cheats from user data
+    const cheats = user?.categories?.flatMap(cat => cat.cheats || []) || [];
+    
+    // Try to find cheat in state or derived list
+    const cheat = location.state?.cheat || cheats.find(c => c.id === parseInt(id));
 
     if (!cheat) return <div className="container">Entry not found.</div>;
 

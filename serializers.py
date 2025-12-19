@@ -4,10 +4,12 @@ from marshmallow import fields
 
 
 class CheatSchema(ma.SQLAlchemyAutoSchema):
+    language = fields.Nested(lambda: LanguageSchema(), dump_only=True)
+    category = fields.Nested(lambda: CategorySchema(), dump_only=True)
+    
     class Meta:
         model = Cheat
         load_instance = True
-        include_relationships = False
         include_fk = True
 
 cheat_schema = CheatSchema()

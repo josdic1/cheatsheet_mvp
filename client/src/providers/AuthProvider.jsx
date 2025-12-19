@@ -2,77 +2,60 @@ import { AuthContext } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 
 export function AuthProvider({ children }) {
-  const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [cheatsOnly, setCheatsOnly] = useState([]);
-  const [languages, setLanguages] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [user, setUser] = useState(null); // ONE state for everything
+  const [allLanguages, setAllLanguages] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
 
+  const loggedIn = Boolean(user);
+  // const API_URL = import.meta.env.VITE_API_BASE_URL || "/api";
   const API_URL = "http://localhost:5555/api";
 
   useEffect(() => {
     checkSession();
+    fetchAllLanguages();
+    fetchAllCategories();
   }, []);
 
-  async function checkSession() {
-    try {
-      const r = await fetch(`${API_URL}/check_session`, {
-        credentials: "include",
-      });
-      if (!r.ok) {
-        throw new Error("💥 Error");
-      }
-      const data = await r.json();
+const checkSession = async () => {
+  try {
+    const response = await fetch(`${API_URL}/check_session`, {
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json();
       if (data.logged_in) {
-        setLoggedIn(true);
         setUser(data.user);
+      } else {
+        setUser(null);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
     }
+  } catch (error) {
+    console.error("Error checking session:", error);
+  } finally {
+    setLoading(false);
   }
+};
 
-  useEffect(() => {
-    if (user?.categories) {
-      const cheats = user.categories.flatMap((cat) => cat.cheats || []);
-      setCheatsOnly(cheats);
+  const fetchAllLanguages = async () => {
+    try {
+      const res = await fetch(`${API_URL}/languages`);
+      const data = await res.json();
+      setAllLanguages(data);
+    } catch (err) {
+  
     }
-  }, [user]);
+  };
 
-  useEffect(() => {
-    async function fetchLanguages() {
-      try {
-        const response = await fetch(`${API_URL}/languages`, {
-          credentials: "include",
-        });
-        const data = await response.json();
-        setLanguages(data);
-      } catch (error) {
-        console.error("Error fetching languages:", error);
-      }
+  const fetchAllCategories = async () => {
+    try {
+      const res = await fetch(`${API_URL}/categories`);
+      const data = await res.json();
+      setAllCategories(data);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
     }
-
-    fetchLanguages();
-  }, []);
-
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const response = await fetch(`${API_URL}/categories`, {
-          credentials: "include",
-        });
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    }
-
-    fetchCategories();
-  }, []);
+  };
 
   async function signup(credentials) {
     try {
@@ -122,93 +105,104 @@ export function AuthProvider({ children }) {
         method: "POST",
         credentials: "include",
       });
+      setUser(null);
     } catch (error) {
       console.error("Logout error:", error);
-    } finally {
-      setUser(null);
-      setLoggedIn(false);
     }
   };
 
-  const createCheat = async (cheatData) => {
+  // ✅ THE "IOU" PATTERN - Just update the flat list
+  async function createCheat(newCheatData) {
     try {
       const res = await fetch(`${API_URL}/cheats`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(cheatData),
+        body: JSON.stringify(newCheatData),
       });
 
-      if (res.ok) {
-        const newCheat = await res.json();
-        setCheatsOnly((prev) => [...prev, newCheat]);
-        return { success: true, cheat: newCheat };
-      } else {
+      if (!res.ok) {
         const error = await res.json();
-        return { success: false, error: error.error };
+        return { success: false, error: error.message };
       }
+
+      const newCheat = await res.json();
+
+      // Just refetch - simplest solution
+      await checkSession();
+
+      return { success: true };
     } catch (err) {
       return { success: false, error: "Network error" };
     }
-  };
+  }
 
-  const updateCheat = async (id, cheatData) => {
+  async function updateCheat(cheatId, updatedData) {
     try {
-      const res = await fetch(`${API_URL}/cheats/${parseInt(id, 10)}`, {
+      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(cheatData),
+        body: JSON.stringify(updatedData),
       });
 
-      if (res.ok) {
-        const updatedCheat = await res.json();
-        setCheatsOnly((prev) => {
-          return prev.map((c) => (c.id == id ? updatedCheat : c)); // == instead of ===
-        });
-        return { success: true, cheat: updatedCheat };
-      } else {
+      if (!res.ok) {
         const error = await res.json();
-        return { success: false, error: error.error };
+        return { success: false, error: error.message };
       }
+
+      // Just refetch
+      await checkSession();
+
+      return { success: true };
     } catch (err) {
       return { success: false, error: "Network error" };
     }
-  };
+  }
 
-  const deleteCheat = async (id) => {
+  async function deleteCheat(cheatId) {
     try {
-      const res = await fetch(`${API_URL}/cheats/${parseInt(id, 10)}`, {
+      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
         method: "DELETE",
         credentials: "include",
       });
 
-      if (res.ok) {
-        setCheatsOnly((prev) => prev.filter((c) => c.id !== parseInt(id)));
-        return { success: true };
-      } else {
+      if (!res.ok) {
         const error = await res.json();
-        return { success: false, error: error.error };
+        return { success: false, error: error.message };
       }
+
+      // Just refetch
+      await checkSession();
+
+      return { success: true };
     } catch (err) {
       return { success: false, error: "Network error" };
     }
-  };
+  }
 
   const value = {
     loading,
     loggedIn,
-    user,
+    user, // ✅ Everything is here: user.languages, user.categories
+    allLanguages,
+    allCategories,
+    signup,
     login,
     logout,
-    signup,
-    cheatsOnly,
+    checkSession,
     createCheat,
     updateCheat,
     deleteCheat,
-    languages,
-    categories,
   };
+
+  if (loading) {
+    return (
+      <div>
+        LOADING...
+      </div>
+    );
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

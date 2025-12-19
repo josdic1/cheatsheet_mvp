@@ -5,8 +5,7 @@ import { NavBar } from "./components/Navbar.jsx";
 function App() {
   return (
     <>
-    <div className="crt">
-      <div className="outrun-grid" />
+
       <AuthProvider>
     <header>
       <NavBar />
@@ -15,7 +14,6 @@ function App() {
       <Outlet />
     </main>
      </AuthProvider>
-     </div>
     </>
   );
 }
