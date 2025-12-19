@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-export function CheatFormSemantic() {
+export function CheatForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
