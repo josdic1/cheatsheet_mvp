@@ -23,6 +23,13 @@ body {
   -webkit-font-smoothing: antialiased; /* Makes fonts crisp */
 }
 
+textarea {
+  width: 100%;
+  min-height: 150px;
+  font-family: monospace;
+  white-space: pre;
+}
+
 /* === 2. LAYOUT CONTAINER === */
 .container {
   max-width: 1400px; /* Wide screen support */
