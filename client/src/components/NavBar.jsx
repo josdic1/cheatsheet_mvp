@@ -17,7 +17,6 @@ export function NavBar() {
       <div className="nav-links">
         {user ? (
           <>
-            <Link to="/cheats/new">Add Entry</Link>
             <button onClick={handleLogout}>Logout</button>
           </>
         ) : (
