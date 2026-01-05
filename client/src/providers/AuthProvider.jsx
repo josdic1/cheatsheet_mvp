@@ -127,9 +127,22 @@ const checkSession = async () => {
       }
 
       const newCheat = await res.json();
+      
+      setUser(prevUser => {
+      if (!prevUser) return prevUser;
 
-      // Just refetch - simplest solution
-      await checkSession();
+      return {
+        ...prevUser,
+        categories: prevUser.categories.map(category =>
+          category.id === newCheat.category_id
+            ? {
+                ...category,
+                cheats: [...category.cheats, newCheat],
+              }
+            : category
+        ),
+      };
+    });
 
       return { success: true };
     } catch (err) {
@@ -138,48 +151,80 @@ const checkSession = async () => {
   }
 
   async function updateCheat(cheatId, updatedData) {
-    try {
-      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(updatedData),
-      });
+  try {
+    const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updatedData),
+    });
 
-      if (!res.ok) {
-        const error = await res.json();
-        return { success: false, error: error.message };
-      }
-
-      // Just refetch
-      await checkSession();
-
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: "Network error" };
+    if (!res.ok) {
+      const error = await res.json();
+      return { success: false, error: error.message };
     }
+
+    const updatedCheat = await res.json();  // get the updated cheat back
+
+    // Update local state
+    setUser(prev => ({
+      ...prev,
+      categories: prev.categories.map(cat => ({
+        ...cat,
+        cheats: cat.cheats.map(ch => 
+          ch.id === parseInt(cheatId) ? updatedCheat : ch
+        )
+      })),
+      languages: prev.languages.map(lang => ({
+        ...lang,
+        cheats: lang.cheats.map(ch => 
+          ch.id === parseInt(cheatId) ? updatedCheat : ch
+        )
+      }))
+    }));
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: "Network error" };
   }
+}
 
-  async function deleteCheat(cheatId) {
-    try {
-      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+ async function deleteCheat(categoryId, cheatId) {
+  try {
+    const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-      if (!res.ok) {
-        const error = await res.json();
-        return { success: false, error: error.message };
-      }
-
-      // Just refetch
-      await checkSession();
-
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: "Network error" };
+    if (!res.ok) {
+      const error = await res.json();
+      return { success: false, error: error.message };
     }
+
+    setUser(prevUser => {
+      if (!prevUser) return prevUser;
+
+      return {
+        ...prevUser,
+        categories: prevUser.categories.map(category => {
+          if (category.id !== categoryId) return category;
+
+          return {
+            ...category,
+            cheats: category.cheats.filter(
+              cheat => cheat.id !== cheatId
+            ),
+          };
+        }),
+      };
+    });
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: "Network error" };
   }
+}
+
 
   const value = {
     loading,

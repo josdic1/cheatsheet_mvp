@@ -4,7 +4,7 @@ import { CategoryCheatsPage } from "./pages/CategoryCheatsPage.jsx";
 import { CategoryCheatView } from "./pages/CategoryCheatView.jsx";
 import { CategoryCheatForm } from "./components/CategoryCheatForm.jsx";
 import { ErrorPage } from "./pages/ErrorPage.jsx";
-import { HomePage2 } from "./pages/HomePage2.jsx";
+import { HomePage } from "./pages/HomePage.jsx";
 import { LanguageCheatsPage } from "./pages/LanguageCheatsPage.jsx";
 import { LanguageCheatView } from "./pages/LanguageCheatView.jsx";
 import { LanguageCheatForm } from "./components/LanguageCheatForm.jsx";
@@ -22,7 +22,7 @@ export const routes = [
         index: true,
         element: (
           <ProtectedRoute>
-            <HomePage2 />
+            <HomePage />
           </ProtectedRoute>
         ),
       },
@@ -36,8 +36,6 @@ export const routes = [
         element: <SignupPage />,
         errorElement: <ErrorPage />,
       },
-
- 
     {
         path: "/categories/:categoryId",
         element: (
