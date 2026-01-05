@@ -17,34 +17,32 @@ export function AuthProvider({ children }) {
     fetchAllCategories();
   }, []);
 
-const checkSession = async () => {
-  try {
-    const response = await fetch(`${API_URL}/check_session`, {
-      credentials: "include",
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data.logged_in) {
-        setUser(data.user);
-      } else {
-        setUser(null);
+  const checkSession = async () => {
+    try {
+      const response = await fetch(`${API_URL}/check_session`, {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.logged_in) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
       }
+    } catch (error) {
+      console.error("Error checking session:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error checking session:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const fetchAllLanguages = async () => {
     try {
       const res = await fetch(`${API_URL}/languages`);
       const data = await res.json();
       setAllLanguages(data);
-    } catch (err) {
-  
-    }
+    } catch (err) {}
   };
 
   const fetchAllCategories = async () => {
@@ -127,22 +125,20 @@ const checkSession = async () => {
       }
 
       const newCheat = await res.json();
-      
-      setUser(prevUser => {
-      if (!prevUser) return prevUser;
 
-      return {
-        ...prevUser,
-        categories: prevUser.categories.map(category =>
-          category.id === newCheat.category_id
-            ? {
-                ...category,
-                cheats: [...category.cheats, newCheat],
-              }
-            : category
+      setUser((prev) => ({
+        ...prev,
+        categories: prev.categories.map((cat) =>
+          cat.id === newCheat.category_id
+            ? { ...cat, cheats: [...cat.cheats, newCheat] }
+            : cat
         ),
-      };
-    });
+        languages: prev.languages.map((lang) =>
+          lang.id === newCheat.language_id
+            ? { ...lang, cheats: [...lang.cheats, newCheat] }
+            : lang
+        ),
+      }));
 
       return { success: true };
     } catch (err) {
@@ -151,80 +147,73 @@ const checkSession = async () => {
   }
 
   async function updateCheat(cheatId, updatedData) {
-  try {
-    const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(updatedData),
-    });
+    try {
+      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(updatedData),
+      });
 
-    if (!res.ok) {
-      const error = await res.json();
-      return { success: false, error: error.message };
+      if (!res.ok) {
+        const error = await res.json();
+        return { success: false, error: error.message };
+      }
+
+      const updatedCheat = await res.json(); // get the updated cheat back
+
+      // Update local state
+      setUser((prev) => ({
+        ...prev,
+        categories: prev.categories.map((cat) => ({
+          ...cat,
+          cheats: cat.cheats.map((ch) =>
+            ch.id === parseInt(cheatId) ? updatedCheat : ch
+          ),
+        })),
+        languages: prev.languages.map((lang) => ({
+          ...lang,
+          cheats: lang.cheats.map((ch) =>
+            ch.id === parseInt(cheatId) ? updatedCheat : ch
+          ),
+        })),
+      }));
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "Network error" };
     }
-
-    const updatedCheat = await res.json();  // get the updated cheat back
-
-    // Update local state
-    setUser(prev => ({
-      ...prev,
-      categories: prev.categories.map(cat => ({
-        ...cat,
-        cheats: cat.cheats.map(ch => 
-          ch.id === parseInt(cheatId) ? updatedCheat : ch
-        )
-      })),
-      languages: prev.languages.map(lang => ({
-        ...lang,
-        cheats: lang.cheats.map(ch => 
-          ch.id === parseInt(cheatId) ? updatedCheat : ch
-        )
-      }))
-    }));
-
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: "Network error" };
   }
-}
 
- async function deleteCheat(categoryId, cheatId) {
-  try {
-    const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+  async function deleteCheat(cheatId) {
+    try {
+      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    if (!res.ok) {
-      const error = await res.json();
-      return { success: false, error: error.message };
+      if (!res.ok) {
+        const error = await res.json();
+        return { success: false, error: error.message };
+      }
+
+      setUser((prev) => ({
+        ...prev,
+        categories: prev.categories.map((cat) => ({
+          ...cat,
+          cheats: cat.cheats.filter((ch) => ch.id !== parseInt(cheatId)),
+        })),
+        languages: prev.languages.map((lang) => ({
+          ...lang,
+          cheats: lang.cheats.filter((ch) => ch.id !== parseInt(cheatId)),
+        })),
+      }));
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: "Network error" };
     }
-
-    setUser(prevUser => {
-      if (!prevUser) return prevUser;
-
-      return {
-        ...prevUser,
-        categories: prevUser.categories.map(category => {
-          if (category.id !== categoryId) return category;
-
-          return {
-            ...category,
-            cheats: category.cheats.filter(
-              cheat => cheat.id !== cheatId
-            ),
-          };
-        }),
-      };
-    });
-
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: "Network error" };
   }
-}
-
 
   const value = {
     loading,
@@ -242,11 +231,7 @@ const checkSession = async () => {
   };
 
   if (loading) {
-    return (
-      <div>
-        LOADING...
-      </div>
-    );
+    return <div>LOADING...</div>;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

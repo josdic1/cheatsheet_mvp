@@ -15,6 +15,7 @@ export function HomePage() {
   return (
     <>
       <div className="container">
+        <div>Categories</div>
         <div className="btn-menu">
           {user.categories.map((c) => (
             <button
@@ -27,6 +28,7 @@ export function HomePage() {
             </button>
           ))}
         </div>
+         <div>Languages</div>
         <div className="btn-menu">
           {user.languages.map((l) => (
             <button

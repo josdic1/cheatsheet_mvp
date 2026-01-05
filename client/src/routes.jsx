@@ -64,7 +64,7 @@ export const routes = [
         ),
         errorElement: <ErrorPage />,
       },
-             {
+      {
         path: "/languages/:languageId/cheats/new",
         element: (
           <ProtectedRoute>
