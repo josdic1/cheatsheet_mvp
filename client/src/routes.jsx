@@ -101,7 +101,7 @@ export const routes = [
         errorElement: <ErrorPage />,
       },
          {
-        path: "/languages/:languageyId/cheats/:cheatId/edit",
+        path: "/languages/:languageId/cheats/:cheatId/edit",
         element: (
           <ProtectedRoute>
             <LanguageCheatForm />

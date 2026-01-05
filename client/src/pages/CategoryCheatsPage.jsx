@@ -11,7 +11,7 @@ export function CategoryCheatsPage() {
   if (!category) return <div>Category not found</div>;
 
 async function handleDelete(id) {
-  const result = await deleteCheat(Number(categoryId), id);
+  const result = await deleteCheat(Number(id));
   if (!result.success) {
     console.error("Failed:", result.error);
     return;

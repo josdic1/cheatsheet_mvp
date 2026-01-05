@@ -10,13 +10,13 @@ export function LanguageCheatsPage() {
 
   if (!language) return <div>Language not found</div>;
 
-  async function handleDelete(id) {
-    const result = await deleteCheat(Number(id));
-    if (!result.success) {
-      console.error("Failed:", result.error);
-      return;
-    }
+async function handleDelete(id) {
+  const result = await deleteCheat(Number(id));
+  if (!result.success) {
+    console.error("Failed:", result.error);
+    return;
   }
+}
   return (
     <>
       <h1>{`Languages > ${language.name}`}</h1>

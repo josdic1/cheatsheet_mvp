@@ -44,6 +44,7 @@ export function CategoryCheatForm() {
       code: "",
       notes: "",
       category_id: "",
+      language_id: "",
       user_id: ""
     });
   };
