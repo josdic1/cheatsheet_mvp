@@ -111,79 +111,126 @@ export function AuthProvider({ children }) {
 
   // ✅ THE "IOU" PATTERN - Just update the flat list
   async function createCheat(newCheatData) {
-    try {
-      const res = await fetch(`${API_URL}/cheats`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(newCheatData),
-      });
+  try {
+    const res = await fetch(`${API_URL}/cheats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(newCheatData),
+    });
 
-      if (!res.ok) {
-        const error = await res.json();
-        return { success: false, error: error.message };
-      }
-
-      const newCheat = await res.json();
-
-      setUser((prev) => ({
-        ...prev,
-        categories: prev.categories.map((cat) =>
-          cat.id === newCheat.category_id
-            ? { ...cat, cheats: [...cat.cheats, newCheat] }
-            : cat
-        ),
-        languages: prev.languages.map((lang) =>
-          lang.id === newCheat.language_id
-            ? { ...lang, cheats: [...lang.cheats, newCheat] }
-            : lang
-        ),
-      }));
-
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: "Network error" };
+    if (!res.ok) {
+      const error = await res.json();
+      return { success: false, error: error.message };
     }
+
+    const newCheat = await res.json();
+
+    setUser((prev) => {
+  const catExists = prev.categories.some(c => c.id === newCheat.category_id);
+  const langExists = prev.languages.some(l => l.id === newCheat.language_id);
+
+  let newCategories;
+  let newLanguages;
+
+  // Handle categories
+  if (catExists) {
+    newCategories = prev.categories.map(c => 
+      c.id === newCheat.category_id
+        ? { ...c, cheats: [...c.cheats, newCheat] }
+        : c
+    );
+  } else {
+    newCategories = [...prev.categories, { 
+      id: newCheat.category_id, 
+      name: newCheat.category, 
+      cheats: [newCheat] 
+    }];
   }
+
+  // Handle languages
+  if (langExists) {
+    newLanguages = prev.languages.map(l => 
+      l.id === newCheat.language_id
+        ? { ...l, cheats: [...l.cheats, newCheat] }
+        : l
+    );
+  } else {
+    newLanguages = [...prev.languages, { 
+      id: newCheat.language_id, 
+      name: newCheat.language, 
+      cheats: [newCheat] 
+    }];
+  }
+
+  return {
+    ...prev,
+    categories: newCategories,
+    languages: newLanguages,
+  };
+});
+
+return { success: true };
+
+  } catch (err) {
+    return { success: false, error: "Network error" };
+  }
+}
 
   async function updateCheat(cheatId, updatedData) {
-    try {
-      const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(updatedData),
-      });
+  try {
+    const res = await fetch(`${API_URL}/cheats/${cheatId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updatedData),
+    });
 
-      if (!res.ok) {
-        const error = await res.json();
-        return { success: false, error: error.message };
-      }
+    if (!res.ok) {
+      const error = await res.json();
+      return { success: false, error: error.message };
+    }
 
-      const updatedCheat = await res.json(); // get the updated cheat back
+    const updatedCheat = await res.json();
 
-      // Update local state
-      setUser((prev) => ({
-        ...prev,
-        categories: prev.categories.map((cat) => ({
-          ...cat,
-          cheats: cat.cheats.map((ch) =>
-            ch.id === parseInt(cheatId) ? updatedCheat : ch
-          ),
-        })),
-        languages: prev.languages.map((lang) => ({
-          ...lang,
-          cheats: lang.cheats.map((ch) =>
-            ch.id === parseInt(cheatId) ? updatedCheat : ch
-          ),
-        })),
+    setUser((prev) => {
+      // Remove from all categories and languages first
+      const cleanedCats = prev.categories.map(c => ({
+        ...c,
+        cheats: c.cheats.filter(ch => ch.id !== parseInt(cheatId))
+      }));
+      
+      const cleanedLangs = prev.languages.map(l => ({
+        ...l,
+        cheats: l.cheats.filter(ch => ch.id !== parseInt(cheatId))
       }));
 
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: "Network error" };
-    }
+      // Check if target category/language exists
+      const catExists = cleanedCats.find(c => c.id === updatedCheat.category_id);
+      const langExists = cleanedLangs.find(l => l.id === updatedCheat.language_id);
+
+      return {
+        ...prev,
+        categories: (catExists
+          ? cleanedCats.map(c => c.id === updatedCheat.category_id
+              ? { ...c, cheats: [...c.cheats, updatedCheat] }
+              : c)
+          : [...cleanedCats, { id: updatedCheat.category_id, name: updatedCheat.category, cheats: [updatedCheat] }]
+        ).filter(c => c.cheats.length > 0),
+        languages: (langExists
+          ? cleanedLangs.map(l => l.id === updatedCheat.language_id
+              ? { ...l, cheats: [...l.cheats, updatedCheat] }
+              : l)
+          : [...cleanedLangs, { id: updatedCheat.language_id, name: updatedCheat.language, cheats: [updatedCheat] }]
+        ).filter(l => l.cheats.length > 0),
+      };
+    });
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: "Network error" };
   }
+}
 
   async function deleteCheat(cheatId) {
     try {
@@ -197,17 +244,19 @@ export function AuthProvider({ children }) {
         return { success: false, error: error.message };
       }
 
-      setUser((prev) => ({
-        ...prev,
-        categories: prev.categories.map((cat) => ({
-          ...cat,
-          cheats: cat.cheats.filter((ch) => ch.id !== parseInt(cheatId)),
-        })),
-        languages: prev.languages.map((lang) => ({
-          ...lang,
-          cheats: lang.cheats.filter((ch) => ch.id !== parseInt(cheatId)),
-        })),
-      }));
+      setUser((prev) => {
+  const updated = {
+    ...prev,
+    categories: prev.categories
+      .map(c => ({ ...c, cheats: c.cheats.filter(ch => ch.id !== parseInt(cheatId)) }))
+      .filter(c => c.cheats.length > 0),
+    languages: prev.languages
+      .map(l => ({ ...l, cheats: l.cheats.filter(ch => ch.id !== parseInt(cheatId)) }))
+      .filter(l => l.cheats.length > 0),
+  };
+  // console.log('categories after delete:', updated.categories.map(c => c.name));
+  return updated;
+});
 
       return { success: true };
     } catch (err) {

@@ -15,11 +15,17 @@ class User(db.Model):
     # Relationship to cheats
     cheats = db.relationship('Cheat', back_populates='user', cascade='all, delete-orphan')
     
-    # Association proxy to get categories through cheats
-    categories = association_proxy('cheats', 'category',
-                                   creator=lambda category_obj: Cheat(category=category_obj))
-    languages = association_proxy('cheats', 'language',
-                                   creator=lambda language_obj: Cheat(language=language_obj))
+    # User categories
+    categories = db.relationship('Category', 
+                                secondary='cheats',  # Cheats is the join table!
+                                back_populates='users',
+                                viewonly=True)
+    
+    # User languages
+    languages = db.relationship('Language', 
+                                secondary='cheats',  # Cheats is the join table!
+                                back_populates='users',
+                                viewonly=True)
     
     @property
     def password(self):
@@ -42,11 +48,14 @@ class Language(db.Model):
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationship to cheats
-    cheats = db.relationship('Cheat', back_populates='language')
+    cheats = db.relationship('Cheat', back_populates='language', cascade='all, delete-orphan')
+
+    users = db.relationship('User',
+                           secondary='cheats',
+                           back_populates='languages',
+                           viewonly=True)
     
-    # Association proxy to get users through cheats
-    users = association_proxy('cheats', 'user',
-                              creator=lambda user_obj: Cheat(user=user_obj))
+
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -59,9 +68,10 @@ class Category(db.Model):
     # Relationship to cheats
     cheats = db.relationship('Cheat', back_populates='category')
     
-    # Association proxy to get users through cheats
-    users = association_proxy('cheats', 'user',
-                              creator=lambda user_obj: Cheat(user=user_obj))
+    users = db.relationship('User',
+                           secondary='cheats',
+                           back_populates='categories',
+                           viewonly=True)
 
 
 class Cheat(db.Model):

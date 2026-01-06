@@ -1,4 +1,4 @@
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function LanguageCheatsPage() {
@@ -8,7 +8,8 @@ export function LanguageCheatsPage() {
 
   const language = user?.languages?.find((l) => l.id === parseInt(languageId));
 
-  if (!language) return <div>Language not found</div>;
+  if (!user?.languages) return <div>Loading...</div>;
+  if (!language) return <Navigate to="/" />;
 
 async function handleDelete(id) {
   const result = await deleteCheat(Number(id));
@@ -34,7 +35,7 @@ async function handleDelete(id) {
           {language.cheats.map((lc) => (
             <tr key={lc.id}>
               <td>{lc.title}</td>
-              <td>{lc.category?.name}</td>
+              <td>{lc.category}</td>
               <td>{lc.notes}</td>
               <td>
                 <div className="item-btn-menu">
