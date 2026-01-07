@@ -3,13 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function LanguageCheatView() {
-    const { user } = useAuth()
+    const { userLanguages } = useAuth()
     const { languageId, cheatId } = useParams()
     const navigate = useNavigate()
 
       // Find the language (door)
-  const language = user?.languages?.find(l => l.id === parseInt(languageId));
-  
+  const language = userLanguages.find((l) => l.id === parseInt(languageId));
+
   // Find the cheat through that door
   const cheat = language?.cheats?.find(ch => ch.id === parseInt(cheatId));
 

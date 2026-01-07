@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function NavBar() {
-  const { user, logout } = useAuth();
+  const { loggedIn, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -15,7 +15,7 @@ export function NavBar() {
       <Link to="/" className="nav-brand">GOTO</Link>
 
       <div className="nav-links">
-        {user ? (
+        {loggedIn ? (
           <>
             <button onClick={handleLogout}>Logout</button>
           </>

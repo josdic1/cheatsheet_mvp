@@ -2,10 +2,10 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export function HomePage() {
-  const { user } = useAuth();
+  const { userCategories, userLanguages } = useAuth();
   const navigate = useNavigate();
 
-  if (!user) return <div className="container">Loading database...</div>;
+  if (!userCategories || !userLanguages) return <div className="container">Loading database...</div>;
 
   const onButtonClick = (e) => {
     const { name, id } = e.target;
@@ -17,7 +17,7 @@ export function HomePage() {
       <div className="container">
         <div>Categories</div>
         <div className="btn-menu">
-          {user.categories.map((c) => (
+          {userCategories.map((c) => (
             <button
               key={c.id}
               name="categories"
@@ -30,7 +30,7 @@ export function HomePage() {
         </div>
          <div>Languages</div>
         <div className="btn-menu">
-          {user.languages.map((l) => (
+          {userLanguages.map((l) => (
             <button
               key={l.id}
               name="languages"

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function CategoryCheatForm() {
-  const { user, createCheat, updateCheat, allLanguages } = useAuth()
+  const { user, userCategories, createCheat, updateCheat, allLanguages } = useAuth()
       const { categoryId, cheatId } = useParams()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -16,11 +16,8 @@ export function CategoryCheatForm() {
   })
     const [inEditMode, setInEditMode] = useState(false);
 
-      const category = user?.categories?.find(c => c.id === parseInt(categoryId));
+      const category = userCategories?.find(c => c.id === parseInt(categoryId));
       const cheat = category?.cheats?.find(ch => ch.id === parseInt(cheatId));
-
-        if (!category) return <div>Category not found</div>;
-        if (!cheat && inEditMode) return <div>Cheat not found</div>;
       
       useEffect(() => {
         if(cheat?.id) {
@@ -36,6 +33,8 @@ export function CategoryCheatForm() {
         }
       },[cheat])
 
+        if (!category) return <div>Category not found</div>;
+        if (!cheat && inEditMode) return <div>Cheat not found</div>;
 
 // CLEAR FORM //
   const onClear = () => {

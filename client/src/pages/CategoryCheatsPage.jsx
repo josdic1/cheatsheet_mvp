@@ -1,14 +1,13 @@
-import { Link, useParams, useNavigate, Navigate} from "react-router-dom";
+import { Link, useParams, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function CategoryCheatsPage() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
-  const { user, deleteCheat } = useAuth();
+  const { userCategories, deleteCheat } = useAuth();
 
-  const category = user?.categories?.find((c) => c.id === parseInt(categoryId));
-
-  if (!user?.categories) return <div>Loading...</div>;
+  const category = userCategories.find((c) => c.id === parseInt(categoryId));
+  
   if (!category) return <Navigate to="/" />;
 
 async function handleDelete(id) {

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function LanguageCheatForm() {
-  const { user, createCheat, updateCheat, allCategories } = useAuth()
+  const { user, userLanguages, createCheat, updateCheat, allCategories } = useAuth()
   const { languageId, cheatId } = useParams()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -16,7 +16,7 @@ export function LanguageCheatForm() {
   })
   const [inEditMode, setInEditMode] = useState(false);
 
-  const language = user?.languages?.find(l => l.id === parseInt(languageId));
+  const language = userLanguages?.find(l => l.id === parseInt(languageId));
   const cheat = language?.cheats?.find(ch => ch.id === parseInt(cheatId));
 
   useEffect(() => {

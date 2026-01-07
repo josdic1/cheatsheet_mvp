@@ -10,11 +10,8 @@ class CheckSession(Resource):
         user_id = session.get('user_id')
         if user_id:
             user = User.query.get(user_id)
-            return {
-                "logged_in": True,
-                "user": user_schema.dump(user)
-            }, 200
-        return {"logged_in": False}, 401
+            return user_schema.dump(user), 200
+        return {"error": "Not authenticated"}, 401
 
 
 ### =========== USER ROUTES =========== ###

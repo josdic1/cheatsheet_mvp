@@ -4,11 +4,10 @@ import { useAuth } from "../hooks/useAuth";
 export function LanguageCheatsPage() {
   const { languageId } = useParams();
   const navigate = useNavigate();
-  const { user, deleteCheat } = useAuth();
+  const { userLanguages, deleteCheat } = useAuth();
 
-  const language = user?.languages?.find((l) => l.id === parseInt(languageId));
-
-  if (!user?.languages) return <div>Loading...</div>;
+  const language = userLanguages.find((l) => l.id === parseInt(languageId));
+  
   if (!language) return <Navigate to="/" />;
 
 async function handleDelete(id) {

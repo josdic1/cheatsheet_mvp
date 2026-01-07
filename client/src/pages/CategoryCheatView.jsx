@@ -3,12 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export function CategoryCheatView() {
-    const { user } = useAuth()
+    const { userCategories } = useAuth()
     const { categoryId, cheatId } = useParams()
     const navigate = useNavigate()
 
       // Find the category (door)
-  const category = user?.categories?.find(c => c.id === parseInt(categoryId));
+  const category = userCategories.find((c) => c.id === parseInt(categoryId));
   
   // Find the cheat through that door
   const cheat = category?.cheats?.find(ch => ch.id === parseInt(cheatId));
