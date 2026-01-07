@@ -19,443 +19,360 @@ with app.app_context():
     db.session.commit()
 
     print("Creating languages...")
-    language_names = ['CSS','HTML','JavaScript','JSON','Python','React','Regex','SQL','Terminal','Xml']
+    language_names = ['Python', 'JavaScript', 'React', 'SQL']
     lang_objs = {name: Language(name=name) for name in language_names}
     db.session.add_all(lang_objs.values())
     db.session.commit()
 
     print("Creating categories...")
-    category_names = ['Arrays','Classes','Curl','Functions','Images','Loops','Manipulation','Methods','Startup','Filters','Components']
+    category_names = ['Basics', 'Arrays', 'Functions', 'Loops', 'API', 'Database']
     cat_objs = {name: Category(name=name) for name in category_names}
     db.session.add_all(cat_objs.values())
     db.session.commit()
 
     print("Creating cheats...")
     cheats = [
-    Cheat(
-        title='New Vite React Project',
-        code='npm create vite@latest client -- --template react\ncd client\nnpm install\nnpm install react-router-dom lucide-react',
-        notes='Executed from existing client folder with router and lucide',
-        user_id=u1.id,
-        language_id=lang_objs['Terminal'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Initial and Use Migration',
-        code='flask db init\nflask db migrate -m "initial migration"\nflask db upgrade',
-        notes='First time setup: init creates migrations folder. After changing models: migrate creates migration file. upgrade applies changes to database. Run from server directory.',
-        user_id=u1.id,
-        language_id=lang_objs['Terminal'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Flask GET Route with jsonify',
-        code='@app.route(\'/cheats\', methods=[\'GET\'])\ndef get_cheats():\n    cheats = Cheat.query.all()\n    return jsonify([cheat.to_dict() for cheat in cheats]), 200',
-        notes='Standard Flask route decorator. Query all cheats from database. Use list comprehension with to_dict() to serialize. jsonify converts to JSON response. Returns 200 status. Use when not using Flask-RESTful.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='React Router Setup in main.jsx',
-        code='import { createRoot } from \'react-dom/client\'\nimport { createBrowserRouter, RouterProvider } from \'react-router-dom\'\nimport { routes } from \'./routes.jsx\'\nimport \'./index.css\'\n\nconst router = createBrowserRouter(routes)\nconst root = createRoot(document.getElementById(\'root\'))\nroot.render(<RouterProvider router={router} />)',
-        notes='Entry point for React app with React Router. Import routes from separate file. createBrowserRouter sets up routing. RouterProvider wraps app with router. Renders into root div.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Vite Proxy Configuration',
-        code='import { defineConfig } from \'vite\'\nimport react from \'@vitejs/plugin-react\'\n\nexport default defineConfig({\n  plugins: [react()],\n  server: {\n    proxy: {\n      \'/api\': {\n        target: \'http://localhost:5555\',\n        changeOrigin: true,\n        rewrite: (path) => path.replace(/^\\/api/, \'\')\n      }\n    }\n  }\n})',
-        notes='Proxies /api requests to Flask backend at port 5555. rewrite strips /api prefix before sending to Flask. Avoids CORS issues in development.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Create React Context',
-        code='import { createContext } from "react";\n\nexport const AuthContext = createContext();',
-        notes='Creates context object for sharing state across components. Export to use in provider and custom hook.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='React Router Routes Setup',
-        code='import App from \'./App.jsx\';\nimport { ErrorPage } from \'./pages/ErrorPage.jsx\';\nimport { ProtectedRoute } from \'./components/ProtectedRoute.jsx\';\n\nexport const routes = [\n    {\n        path: \'/\',\n        element: <ProtectedRoute><App /></ProtectedRoute>,\n        errorElement: <ErrorPage />\n    }\n];',
-        notes='Exports routes array for React Router. Wrap protected routes in ProtectedRoute component.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Protected Route Component',
-        code='import { Navigate } from \'react-router-dom\';\nimport { useAuth } from \'../hooks/useAuth\';\n\nexport function ProtectedRoute({ children }) {\n    const { loggedIn, loading } = useAuth();\n    if (loading) return <div>Loading...</div>;\n    if (!loggedIn) return <Navigate to="/login" replace />;\n    return children;\n}',
-        notes='Wraps routes that require authentication. Redirects to login if not logged in.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Components'].id
-    ),
-    Cheat(
-        title='Basic Error Page Component',
-        code='import { useRouteError, useNavigate } from "react-router-dom";\n\nexport function ErrorPage() {\n    const error = useRouteError();\n    const navigate = useNavigate();\n    return (\n        <div className="error-container">\n            <h1>Oops!</h1>\n            <p>Sorry, an unexpected error has occurred.</p>\n            <p><i>{error.statusText || error.message}</i></p>\n            <button onClick={() => navigate(\'/\')}>Go Home</button>\n        </div>\n    );\n}',
-        notes='Catches routing errors with useRouteError hook. Displays error message and Go Home button.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Components'].id
-    ),
-    Cheat(
-        title='Flask Extensions File',
-        code='from flask_sqlalchemy import SQLAlchemy\nfrom flask_migrate import Migrate\nfrom flask_bcrypt import Bcrypt\nfrom flask_cors import CORS\n\ndb = SQLAlchemy()\nmigrate = Migrate()\nbcrypt = Bcrypt()\ncors = CORS()',
-        notes='Centralized file for Flask extensions. Initialize in create_app().',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Flask Configuration File',
-        code='import os\n\nclass Config:\n    SQLALCHEMY_DATABASE_URI = os.getenv(\'DATABASE_URI\', \'sqlite:///app.db\')\n    SQLALCHEMY_TRACK_MODIFICATIONS = False\n    SECRET_KEY = os.getenv(\'SECRET_KEY\', \'dev-secret-key-change-in-production\')',
-        notes='Configuration class for Flask settings. Import in create_app with app.config.from_object(Config).',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Flask Run File',
-        code='from app import create_app\n\napp = create_app()\n\nif __name__ == \'__main__\':\n    app.run(port=5555, debug=True)',
-        notes='Entry point to run Flask app. Execute with python run.py from server directory.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Startup'].id
-    ),
-    Cheat(
-        title='Password Hashing with Bcrypt',
-        code='from extensions import bcrypt\nhashed = bcrypt.generate_password_hash("password123").decode("utf-8")',
-        notes='Generates secure hashed password. Decode for storing as string.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Check Password with Bcrypt',
-        code='bcrypt.check_password_hash(user.password, "password123")',
-        notes='Validates a plain password against hashed password.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='React useState Hook',
-        code='const [count, setCount] = useState(0);',
-        notes='Declare state variable in React functional component.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='React useEffect Hook',
-        code='useEffect(() => { console.log("Mounted or updated") }, [count]);',
-        notes='Runs effect on mount and when dependencies change.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Fetch GET Example',
-        code='fetch("/api/cheats").then(res => res.json()).then(data => console.log(data))',
-        notes='Basic GET request using fetch in JS.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Fetch POST Example',
-        code='fetch("/api/cheats", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({title:"New Cheat"}) })',
-        notes='Basic POST request using fetch in JS.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Regex Match Example',
-        code='const regex = /abc/gi;\nconst result = "abcABC".match(regex);',
-        notes='Matches regex pattern globally and case-insensitive.',
-        user_id=u1.id,
-        language_id=lang_objs['Regex'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Python List Comprehension',
-        code='squares = [x**2 for x in range(10)]',
-        notes='Creates list of squares from 0 to 9.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='Python Dictionary Comprehension',
-        code='square_dict = {x: x**2 for x in range(10)}',
-        notes='Creates dict mapping numbers to their squares.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='Python Class Example',
-        code='class User:\n    def __init__(self, name):\n        self.name = name\n    def greet(self):\n        return f"Hello {self.name}"',
-        notes='Simple Python class with init and method.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Classes'].id
-    ),
-    Cheat(
-        title='React Functional Component',
-        code='function Hello() {\n    return <h1>Hello World</h1>;\n}',
-        notes='Basic React functional component.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Components'].id
-    ),
-    Cheat(
-        title='React Component with Props',
-        code='function Greet({ name }) {\n    return <p>Hello {name}</p>;\n}',
-        notes='React functional component using props.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Components'].id
-    ),
-    Cheat(
-        title='Array Map Example',
-        code='const nums = [1,2,3];\nconst squares = nums.map(n => n*n);',
-        notes='Maps array values to new array using function.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='Array Filter Example',
-        code='const nums = [1,2,3,4];\nconst evens = nums.filter(n => n%2===0);',
-        notes='Filters array elements based on condition.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='SQL SELECT Example',
-        code='SELECT * FROM cheats WHERE language_id=1;',
-        notes='Select all cheats for language_id 1.',
-        user_id=u1.id,
-        language_id=lang_objs['SQL'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='SQL INSERT Example',
-        code='INSERT INTO cheats (title, code, notes) VALUES ("New", "code", "notes");',
-        notes='Insert new cheat into table.',
-        user_id=u1.id,
-        language_id=lang_objs['SQL'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Python For Loop',
-        code='for i in range(5):\n    print(i)',
-        notes='Loops 0 to 4.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Loops'].id
-    ),
-    Cheat(
-        title='Python While Loop',
-        code='i = 0\nwhile i < 5:\n    print(i)\n    i += 1',
-        notes='While loop counting 0 to 4.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Loops'].id
-    ),
-    Cheat(
-        title='JS For Loop',
-        code='for(let i=0;i<5;i++){console.log(i)}',
-        notes='JavaScript for loop counting 0 to 4.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Loops'].id
-    ),
-    Cheat(
-        title='JS While Loop',
-        code='let i=0; while(i<5){console.log(i); i++;}',
-        notes='JavaScript while loop counting 0 to 4.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Loops'].id
-    ),
-    Cheat(
-        title='Python Function Example',
-        code='def add(a,b):\n    return a+b',
-        notes='Defines a function that returns sum.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Functions'].id
-    ),
-    Cheat(
-        title='JS Function Example',
-        code='function add(a,b){return a+b;}',
-        notes='Defines JavaScript function returning sum.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Functions'].id
-    ),
-    Cheat(
-        title='React useNavigate Example',
-        code='import { useNavigate } from "react-router-dom";\nconst navigate = useNavigate();\nnavigate("/home");',
-        notes='Programmatically navigate to another route in React.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='JS Array Push Example',
-        code='const arr=[];\narr.push(1);\narr.push(2);',
-        notes='Adds elements to end of array.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='JS Array Pop Example',
-        code='const arr=[1,2];\narr.pop();',
-        notes='Removes last element of array.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='JSON Parse Example',
-        code='const obj = JSON.parse(\'{"name":"Josh"}\');',
-        notes='Parse JSON string into JavaScript object.',
-        user_id=u1.id,
-        language_id=lang_objs['JSON'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='JSON Stringify Example',
-        code='const str = JSON.stringify({name:"Josh"});',
-        notes='Convert JavaScript object into JSON string.',
-        user_id=u1.id,
-        language_id=lang_objs['JSON'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Python Read File',
-        code='with open("file.txt","r") as f:\n    content = f.read()',
-        notes='Reads content from text file.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Python Write File',
-        code='with open("file.txt","w") as f:\n    f.write("Hello")',
-        notes='Writes string to file, overwriting existing.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='React Conditional Render',
-        code='{loggedIn ? <Dashboard /> : <Login /> }',
-        notes='Render component conditionally based on state.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='JS Object Destructuring',
-        code='const {a,b} = {a:1,b:2};',
-        notes='Extract properties from object into variables.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='JS Array Destructuring',
-        code='const [x,y] = [1,2];',
-        notes='Extract values from array into variables.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='React onClick Example',
-        code='<button onClick={() => console.log("clicked")}>Click</button>',
-        notes='Basic click handler in React JSX.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Python If Statement',
-        code='x=5\nif x>0:\n    print("Positive")',
-        notes='Basic if condition in Python.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Filters'].id
-    ),
-    Cheat(
-        title='Python If-Else Statement',
-        code='x=5\nif x>0:\n    print("Positive")\nelse:\n    print("Non-positive")',
-        notes='If-else condition in Python.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Filters'].id
-    ),
-    Cheat(
-        title='JS Ternary Operator',
-        code='const status = loggedIn ? "Yes" : "No";',
-        notes='Ternary for conditional assignment in JS.',
-        user_id=u1.id,
-        language_id=lang_objs['JavaScript'].id,
-        category_id=cat_objs['Filters'].id
-    ),
-    Cheat(
-        title='React useRef Example',
-        code='const inputRef = useRef();\n<input ref={inputRef} />',
-        notes='Create reference to DOM element in React.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    ),
-    Cheat(
-        title='Python Lambda Example',
-        code='add = lambda x,y: x+y\nprint(add(2,3))',
-        notes='Defines anonymous function using lambda.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Functions'].id
-    ),
-    Cheat(
-        title='Python Map Example',
-        code='nums = [1,2,3]\nsquared = list(map(lambda x: x**2, nums))',
-        notes='Applies function to each element in list.',
-        user_id=u1.id,
-        language_id=lang_objs['Python'].id,
-        category_id=cat_objs['Arrays'].id
-    ),
-    Cheat(
-        title='React useContext Example',
-        code='const { user } = useContext(AuthContext);',
-        notes='Access context value in React functional component.',
-        user_id=u1.id,
-        language_id=lang_objs['React'].id,
-        category_id=cat_objs['Methods'].id
-    )
-]
+        # ===================
+        # BASICS
+        # ===================
+        Cheat(
+            title='Python Variable',
+            code='name = "Josh"',
+            notes='Variables store data. No need to declare type.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Basics'].id
+        ),
+        Cheat(
+            title='JS Variable',
+            code='const name = "Josh";\nlet age = 25;',
+            notes='Use const for values that won\'t change, let for ones that will.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Basics'].id
+        ),
+        Cheat(
+            title='Python Print',
+            code='print("Hello World")',
+            notes='Outputs text to the terminal.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Basics'].id
+        ),
+        Cheat(
+            title='JS Console Log',
+            code='console.log("Hello World");',
+            notes='Outputs text to browser or Node console.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Basics'].id
+        ),
+        Cheat(
+            title='Python If/Else',
+            code='if x > 10:\n    print("Big")\nelse:\n    print("Small")',
+            notes='Runs code based on a condition.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Basics'].id
+        ),
+        Cheat(
+            title='JS If/Else',
+            code='if (x > 10) {\n  console.log("Big");\n} else {\n  console.log("Small");\n}',
+            notes='Runs code based on a condition.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Basics'].id
+        ),
 
+        # ===================
+        # ARRAYS
+        # ===================
+        Cheat(
+            title='Python List',
+            code='fruits = ["apple", "banana", "cherry"]',
+            notes='Lists hold multiple items in order.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='JS Array',
+            code='const fruits = ["apple", "banana", "cherry"];',
+            notes='Arrays hold multiple items in order.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='Python List Append',
+            code='fruits.append("orange")',
+            notes='Adds item to end of list.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='JS Array Push',
+            code='fruits.push("orange");',
+            notes='Adds item to end of array.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='Python List Comprehension',
+            code='evens = [x for x in nums if x % 2 == 0]',
+            notes='Creates new list with only matching items.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='JS Array Filter',
+            code='const evens = nums.filter(x => x % 2 === 0);',
+            notes='Creates new array with only matching items.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='JS Array Map',
+            code='const doubled = nums.map(x => x * 2);',
+            notes='Transforms each item into something new.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
+        Cheat(
+            title='React Render List',
+            code='{items.map(item => (\n  <li key={item.id}>{item.name}</li>\n))}',
+            notes='Loop through data and render JSX for each.',
+            user_id=u1.id,
+            language_id=lang_objs['React'].id,
+            category_id=cat_objs['Arrays'].id
+        ),
 
-    # Add all cheats to session
+        # ===================
+        # FUNCTIONS
+        # ===================
+        Cheat(
+            title='Python Function',
+            code='def greet(name):\n    return f"Hello {name}"',
+            notes='Functions are reusable blocks of code.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Functions'].id
+        ),
+        Cheat(
+            title='JS Function',
+            code='function greet(name) {\n  return `Hello ${name}`;\n}',
+            notes='Functions are reusable blocks of code.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Functions'].id
+        ),
+        Cheat(
+            title='JS Arrow Function',
+            code='const greet = (name) => `Hello ${name}`;',
+            notes='Shorter syntax for simple functions.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Functions'].id
+        ),
+        Cheat(
+            title='React Component',
+            code='function Welcome({ name }) {\n  return <h1>Hello {name}</h1>;\n}',
+            notes='Components are functions that return JSX.',
+            user_id=u1.id,
+            language_id=lang_objs['React'].id,
+            category_id=cat_objs['Functions'].id
+        ),
+        Cheat(
+            title='React useState',
+            code='const [count, setCount] = useState(0);',
+            notes='Stores state in a component. Call setCount to update.',
+            user_id=u1.id,
+            language_id=lang_objs['React'].id,
+            category_id=cat_objs['Functions'].id
+        ),
+        Cheat(
+            title='React useEffect',
+            code='useEffect(() => {\n  fetchData();\n}, []);',
+            notes='Runs code when component mounts. Empty array = once.',
+            user_id=u1.id,
+            language_id=lang_objs['React'].id,
+            category_id=cat_objs['Functions'].id
+        ),
+
+        # ===================
+        # LOOPS
+        # ===================
+        Cheat(
+            title='Python For Loop',
+            code='for i in range(5):\n    print(i)',
+            notes='Loops from 0 to 4.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Loops'].id
+        ),
+        Cheat(
+            title='JS For Loop',
+            code='for (let i = 0; i < 5; i++) {\n  console.log(i);\n}',
+            notes='Loops from 0 to 4.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Loops'].id
+        ),
+        Cheat(
+            title='Python For Each',
+            code='for fruit in fruits:\n    print(fruit)',
+            notes='Loops through each item in a list.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Loops'].id
+        ),
+        Cheat(
+            title='JS forEach',
+            code='fruits.forEach(fruit => {\n  console.log(fruit);\n});',
+            notes='Loops through each item in an array.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Loops'].id
+        ),
+        Cheat(
+            title='Python While Loop',
+            code='while x < 10:\n    x += 1',
+            notes='Keeps looping while condition is true.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Loops'].id
+        ),
+        Cheat(
+            title='JS While Loop',
+            code='while (x < 10) {\n  x++;\n}',
+            notes='Keeps looping while condition is true.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['Loops'].id
+        ),
+
+        # ===================
+        # API
+        # ===================
+        Cheat(
+            title='JS Fetch GET',
+            code='fetch("/api/users")\n  .then(res => res.json())\n  .then(data => console.log(data));',
+            notes='Fetches data from server.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['API'].id
+        ),
+        Cheat(
+            title='JS Fetch POST',
+            code='fetch("/api/users", {\n  method: "POST",\n  headers: {"Content-Type": "application/json"},\n  body: JSON.stringify({ name: "Josh" })\n});',
+            notes='Sends data to server.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['API'].id
+        ),
+        Cheat(
+            title='JS Async/Await Fetch',
+            code='const res = await fetch("/api/users");\nconst data = await res.json();',
+            notes='Cleaner way to handle fetch. Must be in async function.',
+            user_id=u1.id,
+            language_id=lang_objs['JavaScript'].id,
+            category_id=cat_objs['API'].id
+        ),
+        Cheat(
+            title='Flask GET Route',
+            code='@app.route("/users")\ndef get_users():\n    users = User.query.all()\n    return jsonify([u.to_dict() for u in users])',
+            notes='Returns all users as JSON.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['API'].id
+        ),
+        Cheat(
+            title='Flask POST Route',
+            code='@app.route("/users", methods=["POST"])\ndef create_user():\n    data = request.json\n    user = User(name=data["name"])\n    db.session.add(user)\n    db.session.commit()\n    return jsonify(user.to_dict()), 201',
+            notes='Creates a new user from JSON body.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['API'].id
+        ),
+
+        # ===================
+        # DATABASE
+        # ===================
+        Cheat(
+            title='SQL Select All',
+            code='SELECT * FROM users;',
+            notes='Gets every row from the users table.',
+            user_id=u1.id,
+            language_id=lang_objs['SQL'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQL Select Where',
+            code='SELECT * FROM users WHERE age > 21;',
+            notes='Gets rows matching a condition.',
+            user_id=u1.id,
+            language_id=lang_objs['SQL'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQL Insert',
+            code='INSERT INTO users (name, email)\nVALUES ("Josh", "josh@email.com");',
+            notes='Adds a new row to the table.',
+            user_id=u1.id,
+            language_id=lang_objs['SQL'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQL Update',
+            code='UPDATE users SET name = "Joshua"\nWHERE id = 1;',
+            notes='Changes data in existing row.',
+            user_id=u1.id,
+            language_id=lang_objs['SQL'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQL Delete',
+            code='DELETE FROM users WHERE id = 1;',
+            notes='Removes a row from the table.',
+            user_id=u1.id,
+            language_id=lang_objs['SQL'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQLAlchemy Query All',
+            code='users = User.query.all()',
+            notes='Gets all users from database.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQLAlchemy Query by ID',
+            code='user = User.query.get(1)',
+            notes='Gets user with id of 1.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Database'].id
+        ),
+        Cheat(
+            title='SQLAlchemy Filter',
+            code='users = User.query.filter_by(active=True).all()',
+            notes='Gets all active users.',
+            user_id=u1.id,
+            language_id=lang_objs['Python'].id,
+            category_id=cat_objs['Database'].id
+        ),
+    ]
+
     db.session.add_all(cheats)
     db.session.commit()
 
-    print(f"Created {User.query.count()} users")
+    print(f"Created {User.query.count()} user")
     print(f"Created {Language.query.count()} languages")
     print(f"Created {Category.query.count()} categories")
     print(f"Created {Cheat.query.count()} cheats")

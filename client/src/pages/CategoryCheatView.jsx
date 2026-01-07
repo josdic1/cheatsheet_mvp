@@ -23,8 +23,8 @@ export function CategoryCheatView() {
             <p>{cheat.notes}</p>
            <p>{cheat.category.name}</p>
             <p>{cheat.language.name}</p>
-            <p>{cheat.created_at}</p>
-            <p>{cheat.updated_at}</p>
+           <p className="meta">Created {new Date(cheat.created_at).toLocaleDateString()}</p>
+<p className="meta">Updated {new Date(cheat.updated_at).toLocaleDateString()}</p>
         </>
 )
 }

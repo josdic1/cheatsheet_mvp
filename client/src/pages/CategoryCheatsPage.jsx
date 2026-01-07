@@ -18,7 +18,7 @@ async function handleDelete(id) {
   }
 }
   return (
-    <>
+    <div className="container">
       <h1>{`Categories > ${category.name}`}</h1>
       <Link to={`/categories/${categoryId}/cheats/new`}>New</Link>
       <table>
@@ -31,7 +31,10 @@ async function handleDelete(id) {
           </tr>
         </thead>
         <tbody>
-          {category.cheats.map((cc) => (
+          {category.cheats
+  .slice()
+  .sort((a, b) => a.title.localeCompare(b.title))
+  .map((cc) => (
             <tr key={cc.id}>
               <td>{cc.title}</td>
               <td>{cc.language}</td>
@@ -69,6 +72,6 @@ async function handleDelete(id) {
           ))}
         </tbody>
       </table>
-    </>
+    </div>
   );
 }

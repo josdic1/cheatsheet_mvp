@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
-import { FerrisWheel, FileAxis3D } from "lucide-react";
+import { Zap } from "lucide-react";
 
 export function LoginPage() {
     const [email, setEmail] = useState("");
@@ -15,13 +15,14 @@ export function LoginPage() {
         navigate("/");
     };
 
+    const handleDemoLogin = () => {
+        setEmail('josh@josh.com');
+        setPassword('1111');
+    };
+
     return (
         <div className="auth-box">
-            <h2 className="text-center" style={{ marginTop: 0 }}>Login </h2>
-                <button type='button' onClick={() => {
-                    setEmail('josh@josh.com')
-                    setPassword('1111')}
-                }><FerrisWheel size={16} strokeWidth={1.5} /></button>
+            <h2 className="text-center" style={{ marginTop: 0 }}>Login</h2>
 
             {error && <div style={{ color: "red", marginBottom: "15px" }}>{error}</div>}
 
@@ -30,8 +31,10 @@ export function LoginPage() {
                     <label>Email Address</label>
                     <input
                         type="email"
-                        value={email} onChange={(e) => setEmail(e.target.value)}
-                        required autoFocus
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)}
+                        required 
+                        autoFocus
                     />
                 </div>
 
@@ -39,7 +42,8 @@ export function LoginPage() {
                     <label>Password</label>
                     <input
                         type="password"
-                        value={password} onChange={(e) => setPassword(e.target.value)}
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                     />
                 </div>
@@ -48,6 +52,20 @@ export function LoginPage() {
                     Authenticate
                 </button>
             </form>
+
+            <div className="divider">
+                <span>or</span>
+            </div>
+
+            <button 
+                type="button" 
+                className="demo-btn"
+                onClick={handleDemoLogin}
+            >
+                <Zap size={16} />
+                Use Demo Account
+            </button>
+            <p className="demo-hint">Fills in test credentials — just click Authenticate</p>
 
             <div className="text-center mt-4 text-muted">
                 Need an account? <Link to="/signup" style={{ textDecoration: 'underline' }}>Register here</Link>
