@@ -8,9 +8,6 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { LanguageCheatsPage } from "./pages/LanguageCheatsPage.jsx";
 import { LanguageCheatView } from "./pages/LanguageCheatView.jsx";
 import { LanguageCheatForm } from "./components/LanguageCheatForm.jsx";
-import { LoginPage } from "./pages/LoginPage.jsx";
-import { ProtectedRoute } from "./components/ProtectedRoutes.jsx";
-import { SignupPage } from "./pages/SignupPage.jsx";
 
 export const routes = [
   {
@@ -20,93 +17,53 @@ export const routes = [
     children: [
       {
         index: true,
-        element: (
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        ),
+        element: <HomePage />,
       },
+
       {
-        path: "/login",
-        element: <LoginPage />,
-        errorElement: <ErrorPage />,
-      },
-      {
-        path: "/signup",
-        element: <SignupPage />,
-        errorElement: <ErrorPage />,
-      },
-    {
         path: "/categories/:categoryId",
-        element: (
-          <ProtectedRoute>
-            <CategoryCheatsPage />
-          </ProtectedRoute>
-        ),
+        element: <CategoryCheatsPage />,
         errorElement: <ErrorPage />,
       },
-        
-  {
+
+      {
         path: "/languages/:languageId",
-        element: (
-          <ProtectedRoute>
-            <LanguageCheatsPage />
-          </ProtectedRoute>
-        ),
+        element: <LanguageCheatsPage />,
         errorElement: <ErrorPage />,
       },
       {
         path: "/categories/:categoryId/cheats/new",
         element: (
-          <ProtectedRoute>
+   
             <CategoryCheatForm />
-          </ProtectedRoute>
+      
         ),
         errorElement: <ErrorPage />,
       },
       {
         path: "/languages/:languageId/cheats/new",
-        element: (
-          <ProtectedRoute>
-            <LanguageCheatForm />
-          </ProtectedRoute>
-        ),
+        element: <LanguageCheatForm />,
         errorElement: <ErrorPage />,
       },
 
- {
+      {
         path: "/categories/:categoryId/cheats/:cheatId",
-        element: (
-          <ProtectedRoute>
-            <CategoryCheatView />
-          </ProtectedRoute>
-        ),
+        element: <CategoryCheatView />,
         errorElement: <ErrorPage />,
-      },{
+      },
+      {
         path: "/languages/:languageId/cheats/:cheatId",
-        element: (
-          <ProtectedRoute>
-            <LanguageCheatView />
-          </ProtectedRoute>
-        ),
+        element: <LanguageCheatView />,
         errorElement: <ErrorPage />,
       },
-        {
+      {
         path: "/categories/:categoryId/cheats/:cheatId/edit",
-        element: (
-          <ProtectedRoute>
-            <CategoryCheatForm />
-          </ProtectedRoute>
-        ),
+        element: <CategoryCheatForm />,
         errorElement: <ErrorPage />,
       },
-         {
+      {
         path: "/languages/:languageId/cheats/:cheatId/edit",
-        element: (
-          <ProtectedRoute>
-            <LanguageCheatForm />
-          </ProtectedRoute>
-        ),
+        element: <LanguageCheatForm />,
         errorElement: <ErrorPage />,
       },
     ],
